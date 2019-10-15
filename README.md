@@ -1,1 +1,3 @@
-# noteApp
+#noteApp 
+
+note-app with graphql
