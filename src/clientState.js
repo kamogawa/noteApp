@@ -1,7 +1,16 @@
-export const resolvers = {
-  notes: []
+import { NOTE_FRAGMENT } from "./fragments";
+
+export const defaults = {
+  notes: [
+    {
+      __typename: "Note",
+      id: 1,
+      title: "first",
+      content: "con01"
+    }
+  ]
 };
-export const defaults = [
+export const typeDefs = [
   `
   schema {
     query: Query
@@ -22,8 +31,17 @@ export const defaults = [
   }
   `
 ];
-export const typeDefs = {
+export const resolvers = {
+  Mutation: {},
   Query: {
-    notes: () => true
+    note: (_, variable, {cache}) => {
+      //dataIdFromObject* dev tool관련인듯,
+      const id = cache.config.dataIdFromObject({
+        __typename: "Note",
+        id: variable.id
+      });
+      const note = cache.readFragment({fragment: NOTE_FRAGMENT, id})
+      return note;
+    }
   }
 };
