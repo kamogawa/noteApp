@@ -1,4 +1,5 @@
 import { NOTE_FRAGMENT } from "./fragments";
+import { GET_NOTES } from "./queries";
 
 export const defaults = {
   notes: [
@@ -22,7 +23,7 @@ export const typeDefs = [
   }
   type Mutation {
     cretateNote(title: String!, content: String!)
-    editNote(id: String!, title: String!, content: String!)
+    editNote(id: Int!, title: String!, content: String!)
   }
   type Note {
     id: Int!
@@ -32,7 +33,44 @@ export const typeDefs = [
   `
 ];
 export const resolvers = {
-  Mutation: {},
+  Mutation: {
+    cretateNote: (_, variable, {cache}) => {
+      const { notes } = cache.readQuery({
+        query: GET_NOTES
+      });
+      const { title, content } = variable;
+      const newNote = {
+        __typename: "Note",
+        title,
+        content,
+        id: notes.length +1
+      }
+      cache.writeData({
+        data: {
+          notes: [newNote, ...notes]
+        }
+      });
+      return newNote;
+    },
+    editNote: (_, {id, title, content}, {cache}) => {
+      const noteId = cache.config.dataIdFromObject({
+        __typename: "Note",
+        id
+      });
+      const note = cache.readFragment({fragment: NOTE_FRAGMENT, id: noteId})
+      const updatedNote = {
+        ...note,
+        title,
+        content
+      };
+      cache.writeFragment({
+        id: noteId,
+        fragment: NOTE_FRAGMENT,
+        data: updatedNote
+      });
+      return updatedNote;
+    }
+  },
   Query: {
     note: (_, variable, {cache}) => {
       //dataIdFromObject* dev tool관련인듯,
@@ -40,7 +78,8 @@ export const resolvers = {
         __typename: "Note",
         id: variable.id
       });
-      const note = cache.readFragment({fragment: NOTE_FRAGMENT, id})
+      const note = cache.readFragment({fragment: NOTE_FRAGMENT, id});
+
       return note;
     }
   }
