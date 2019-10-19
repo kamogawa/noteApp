@@ -22,8 +22,8 @@ export const typeDefs = [
     note(id: Int!): Note
   }
   type Mutation {
-    cretateNote(title: String!, content: String!)
-    editNote(id: Int!, title: String!, content: String!)
+    cretateNote(title: String!, content: String!): Note
+    editNote(id: Int!, title: String!, content: String): Note
   }
   type Note {
     id: Int!
